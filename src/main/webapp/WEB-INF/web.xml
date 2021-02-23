@@ -15,7 +15,15 @@
     
   </servlet-mapping>-->
 
-  
+  <servlet>
+  <servlet-name>UserController</servlet-name>
+  <servlet-class>com.tjpu.crm.settings.web.controller.UserController</servlet-class>
+</servlet>
+<servlet-mapping>
+<servlet-name>UserController</servlet-name>
+<url-pattern>/settings/user/xxx.do</url-pattern>
+
+</servlet-mapping>
   
   
 </web-app>
