@@ -49,7 +49,7 @@ public class UserController extends HttpServlet {
         UserService us = (UserService) ServiceFactory.getService(new UserServiceImpl());
         try{
             User user = us.login(loginAct,loginPwd,ip);
-
+            request.getSession().setAttribute("user",user);
             PrintJson.printJsonFlag(response,true);
         }catch (Exception e){
             e.printStackTrace();
