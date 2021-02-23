@@ -28,7 +28,7 @@
  
   <mappers>
    
-      <package name="com.tjpu.crm.settings.dao"/>
+      <mapper resource="com/tjpu/crm/settings/dao/UserDao.xml"/>
     
   </mappers>
 </configuration>
