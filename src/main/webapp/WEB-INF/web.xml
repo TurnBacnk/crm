@@ -31,6 +31,7 @@
     <url-pattern>*.do</url-pattern>
     <url-pattern>*.jsp</url-pattern>
   </filter-mapping>
+ <!-- 用户控制器 -->
   <servlet>
   <servlet-name>UserController</servlet-name>
   <servlet-class>com.tjpu.crm.settings.web.controller.UserController</servlet-class>
@@ -40,7 +41,18 @@
 <url-pattern>/settings/user/login.do</url-pattern>
 
 </servlet-mapping>
-  
+
+  <!--市场活动控制器-->
+  <servlet>
+    <servlet-name>ActivityController</servlet-name>
+    <servlet-class>com.tjpu.crm.workbench.web.controller.ActivityController</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ActivityController</servlet-name>
+    <url-pattern>/workbench/activity/getUserList.do</url-pattern>
+    <url-pattern>/workbench/activity/save.do</url-pattern>
+    <url-pattern>/workbench/activity/pageList.do</url-pattern>
+  </servlet-mapping>
   
 </web-app>
 
