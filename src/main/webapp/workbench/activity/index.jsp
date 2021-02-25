@@ -25,7 +25,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 
 	$(function(){
 		
-		//为创建按钮保定时间，打开添加操作的模态窗口
+		//为创建按钮绑定事件，打开添加操作的模态窗口
 		$("#addBtn").click(function (){
 			$(".time").datetimepicker({
 				minView: "month",
@@ -40,7 +40,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 
 				操作模态窗口的方式：
 
-					需要操作的模态长裤的jquery对象，调用modal为该方法传递参数，show:打开模态窗口 hide:关闭模态窗口
+					需要操作的模态窗口的jquery对象，调用modal为该方法传递参数，show:打开模态窗口 hide:关闭模态窗口
 
 			 */
 			//$("#createActivityModal").modal("show");
@@ -93,7 +93,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 						//添加成功后
 						//刷新列表页
 
-
+						pageList(1,2)
 						//清空添加操作模态窗口的数据
 						$("#activityAddForm")[0].reset();
 						//关闭添加操作的模态窗口
@@ -126,12 +126,48 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 			$("#qx").prop("checked",$("input[name=xz]").length==$("input[name=xz]:checked").length)
 		})
 
+		//为删除按钮绑定事件,执行市场活动删除操作
+		$("#deleteBtn").click(function (){
+			//找到复选框中所有打✅的复选框的jquery对象
+			var $xz = $("input[name=xz]:checked");
+
+			if ($xz.length==0){
+				alert("请选择需要删除的记录");
+			}else {
+				var param = "";
+				for (var i = 0; i < $xz.length; i++) {
+					param += "id=" + $($xz[i]).val();
+					if (i < $xz.length-1){
+						param += "&";
+					}
+				}
+				$.ajax({
+
+					url:"workbench/activity/delete.do",
+					data:param,
+					type:"post",
+					dataType:"json",
+					success:function (data){
+						if(data.success){
+							pageList(1,2);
+
+						}else {
+							alert("删除操作失败");
+						}
+					}
+				})
+			}
+		})
+
 	});
 	//对于所有的关系型数据库，做前端的分页向光操作的基础组件
 	//就是pageNo和pageSize
 	//pageNo:页码
 	//pageSize:每页展现的记录数
 	function pageList(pageNo,pageSize){
+
+		$("#qx").prop("checked",false);
+
 
 		$("#search-name").val($.trim($("#hidden-name").val()));
 		$("#search-owner").val($.trim($("#hidden-owner").val()));
@@ -400,7 +436,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 					-->
 				  <button type="button" class="btn btn-primary" id="addBtn"><span class="glyphicon glyphicon-plus"></span> 创建</button>
 				  <button type="button" class="btn btn-default" data-toggle="modal" data-target="#editActivityModal"><span class="glyphicon glyphicon-pencil"></span> 修改</button>
-				  <button type="button" class="btn btn-danger"><span class="glyphicon glyphicon-minus"></span> 删除</button>
+				  <button type="button" class="btn btn-danger" id="deleteBtn"><span class="glyphicon glyphicon-minus"></span> 删除</button>
 				</div>
 				
 			</div>
