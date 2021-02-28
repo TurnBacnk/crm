@@ -92,8 +92,9 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 					if (data.success){
 						//添加成功后
 						//刷新列表页
-
-						pageList(1,2)
+						pageList(1,
+								$("#activityPage").bs_pagination('getOption','rowsPerPage')
+						);
 						//清空添加操作模态窗口的数据
 						$("#activityAddForm")[0].reset();
 						//关闭添加操作的模态窗口
@@ -134,29 +135,109 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 			if ($xz.length==0){
 				alert("请选择需要删除的记录");
 			}else {
-				var param = "";
-				for (var i = 0; i < $xz.length; i++) {
-					param += "id=" + $($xz[i]).val();
-					if (i < $xz.length-1){
-						param += "&";
+				if (confirm("确定删除所选的记录吗")){
+					var param = "";
+					for (var i = 0; i < $xz.length; i++) {
+						param += "id=" + $($xz[i]).val();
+						if (i < $xz.length-1){
+							param += "&";
+						}
 					}
+					$.ajax({
+
+						url:"workbench/activity/delete.do",
+						data:param,
+						type:"post",
+						dataType:"json",
+						success:function (data){
+							if(data.success){
+								pageList(1,
+										$("#activityPage").bs_pagination('getOption','rowsPerPage')
+								);
+
+							}else {
+								alert("删除操作失败");
+							}
+						}
+					})
 				}
+
+			}
+		})
+		//为修改按钮绑定事件，打开修改操作的模态窗口
+		$("#editBtn").click(function (){
+
+			var $xz = $("input[name=xz]:checked");
+
+			if ($xz.length==0){
+				alert(请选择需要修改的记录);
+			}else if($xz.length>1){
+				alert("只能选择一条记录进行修改");
+			}else{
+				var id = $xz.val();
+
 				$.ajax({
 
-					url:"workbench/activity/delete.do",
-					data:param,
-					type:"post",
+					url:"workbench/activity/getUserListAndActivity.do",
+					data:{
+						"id":id
+					},
+					type:"get",
 					dataType:"json",
 					success:function (data){
-						if(data.success){
-							pageList(1,2);
+						var html = "<option></option>";
+						$.each(data.uList,function (i,n){
+							html +="<option value='"+n.id+"'>"+n.name+"</option>";
+						})
+						$("#edit-owner").html(html);
 
-						}else {
-							alert("删除操作失败");
-						}
+						$("#edit-id").val(data.a.id);
+						$("#edit-name").val(data.a.name);
+						$("#edit-owner").val(data.a.owner);
+						$("#edit-startDate").val(data.a.startDate);
+						$("#edit-endDate").val(data.a.endDate);
+						$("#edit-cost").val(data.a.cost);
+						$("#edit-description").val(data.a.description);
+
+						$("#editActivityModal").modal("show");
+
 					}
 				})
 			}
+		})
+		$("#updateBtn").click(function (){
+
+			$.ajax({
+
+				url:"workbench/activity/update.do",
+				data:{
+
+					"id":$.trim($("#edit-id").val()),
+					"owner":$.trim($("#edit-owner").val()),
+					"startDate":$.trim($("#edit-startDate").val()),
+					"endDate":$.trim($("#edit-endDate").val()),
+					"cost":$.trim($("#edit-cost").val()),
+					"description":$.trim($("#edit-description").val())
+
+				},
+				type:"post",
+				dataType:"json",
+				success:function (data){
+					if (data.success){
+						//添加成功后
+						//刷新列表页
+
+						pageList($("#activityPage").bs_pagination('getOption','currentPage')),$("#activityPage").bs_pagination('getOption','rowsPerPage');
+						//清空添加操作模态窗口的数据
+						//$("#activityAddForm")[0].reset();
+						//关闭添加操作的模态窗口
+						$("#editActivityModal").modal("hide");
+					}else{
+						alert("修改失败");
+					}
+				}
+			})
+
 		})
 
 	});
@@ -196,7 +277,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 				$.each(data.dataList,function (i,n){
 					html +='<tr class="active">';
 					html +='<td><input type="checkbox" name ="xz" value="'+n.id+'"/></td>';
-					html +='<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href=\'workbench/activity/detail.jsp\';">'+n.name+'</a></td>';
+					html +='<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href=\'workbench/activity/detail.do?id='+n.id+'\';">'+n.name+'</a></td>';
 					html +='<td>'+n.owner+'</td>';
 					html +='<td>'+n.startDate+'</td>';
 					html +='<td>'+n.endDate+'</td>';
@@ -314,44 +395,42 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 				<div class="modal-body">
 				
 					<form class="form-horizontal" role="form">
-					
+						<input type="hidden" id="edit-id"/>
 						<div class="form-group">
 							<label for="edit-marketActivityOwner" class="col-sm-2 control-label">所有者<span style="font-size: 15px; color: red;">*</span></label>
 							<div class="col-sm-10" style="width: 300px;">
-								<select class="form-control" id="edit-marketActivityOwner">
-								  <option>zhangsan</option>
-								  <option>lisi</option>
-								  <option>wangwu</option>
+								<select class="form-control" id="edit-owner">
+
 								</select>
 							</div>
                             <label for="edit-marketActivityName" class="col-sm-2 control-label">名称<span style="font-size: 15px; color: red;">*</span></label>
                             <div class="col-sm-10" style="width: 300px;">
-                                <input type="text" class="form-control" id="edit-marketActivityName" value="发传单">
+                                <input type="text" class="form-control" id="edit-name" value="发传单">
                             </div>
 						</div>
 
 						<div class="form-group">
 							<label for="edit-startTime" class="col-sm-2 control-label">开始日期</label>
 							<div class="col-sm-10" style="width: 300px;">
-								<input type="text" class="form-control" id="edit-startTime" value="2020-10-10">
+								<input type="text" class="form-control time" id="edit-startDate" >
 							</div>
 							<label for="edit-endTime" class="col-sm-2 control-label">结束日期</label>
 							<div class="col-sm-10" style="width: 300px;">
-								<input type="text" class="form-control" id="edit-endTime" value="2020-10-20">
+								<input type="text" class="form-control time" id="edit-endDate" >
 							</div>
 						</div>
 						
 						<div class="form-group">
 							<label for="edit-cost" class="col-sm-2 control-label">成本</label>
 							<div class="col-sm-10" style="width: 300px;">
-								<input type="text" class="form-control" id="edit-cost" value="5,000">
+								<input type="text" class="form-control" id="edit-cost" >
 							</div>
 						</div>
 						
 						<div class="form-group">
 							<label for="edit-describe" class="col-sm-2 control-label">描述</label>
 							<div class="col-sm-10" style="width: 81%;">
-								<textarea class="form-control" rows="3" id="edit-describe">市场活动Marketing，是指品牌主办或参与的展览会议与公关市场活动，包括自行主办的各类研讨会、客户交流会、演示会、新产品发布会、体验会、答谢会、年会和出席参加并布展或演讲的展览会、研讨会、行业交流会、颁奖典礼等</textarea>
+								<textarea class="form-control" rows="3" id="edit-description"></textarea>
 							</div>
 						</div>
 						
@@ -360,7 +439,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-					<button type="button" class="btn btn-primary" data-dismiss="modal">更新</button>
+					<button type="button" class="btn btn-primary" id="updateBtn">更新</button>
 				</div>
 			</div>
 		</div>
@@ -435,7 +514,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 
 					-->
 				  <button type="button" class="btn btn-primary" id="addBtn"><span class="glyphicon glyphicon-plus"></span> 创建</button>
-				  <button type="button" class="btn btn-default" data-toggle="modal" data-target="#editActivityModal"><span class="glyphicon glyphicon-pencil"></span> 修改</button>
+				  <button type="button" class="btn btn-default" id="editBtn"><span class="glyphicon glyphicon-pencil"></span> 修改</button>
 				  <button type="button" class="btn btn-danger" id="deleteBtn"><span class="glyphicon glyphicon-minus"></span> 删除</button>
 				</div>
 				
